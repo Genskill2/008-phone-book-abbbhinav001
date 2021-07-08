@@ -238,7 +238,7 @@ int delete(FILE *db_file, char *name) {
       if(p==base)
       {
       	base = p->next;
-      	free_entries(p);
+      	free(p);
       	deleted = 1;
 	  }
 	  else
