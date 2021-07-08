@@ -14,9 +14,10 @@ typedef struct entry0 entry;
 
 /* Command handlers */
 void add(char *, char *);
+int search(FILE *,char *);
 void list(FILE *);
 int delete(FILE *, char *);
-void search(FILE *, char *);
+
 
 /* Utility functions  */
 FILE * open_db_file(); /* Opens the database file. Prints error and
@@ -69,8 +70,15 @@ int main(int argc, char *argv[]) {
     	exit(0);
 	}
 	FILE *fp = open_db_file();
-	search(fp, argv[2]);
+	int a = search(fp, argv[2]);
+	if(a==0)
+	{
+		printf("no match");
+		fclose(fp);
+		exit(1);
+	}
 	fclose(fp);
+	exit(0);
   } 
   	else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
     if (argc != 3) {
@@ -250,7 +258,7 @@ int delete(FILE *db_file, char *name) {
   return deleted;
 }
 
-void search(FILE *fp, char *name)
+int search(FILE *fp, char *name)
 {
 	entry *p = load_entries(fp);
 	entry *h = p;
@@ -260,11 +268,10 @@ void search(FILE *fp, char *name)
 		{
 			printf("%s\n",p->phone);
 			free_entries(h);
-			exit(0);
+			return 1;
 		}
 		p = p->next;
 	}
-	printf("no match\n");
 	free_entries(h);
-	exit(0);
+	return 0;
 }
