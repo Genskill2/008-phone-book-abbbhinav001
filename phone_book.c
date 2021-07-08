@@ -17,6 +17,7 @@ void add(char *, char *);
 int search(FILE *,char *);
 void list(FILE *);
 int delete(FILE *, char *);
+void search(FILE *, char *);
 
 /* Utility functions  */
 FILE * open_db_file(); /* Opens the database file. Prints error and
@@ -62,8 +63,17 @@ int main(int argc, char *argv[]) {
     fclose(fp);
     exit(0);
   } else if (strcmp(argv[1], "search") == 0) {  /* Handle search */
-    printf("NOT IMPLEMENTED!\n"); /* TBD  */
-  } else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
+    //printf("NOT IMPLEMENTED!\n"); /* TBD  */
+    if (argc != 3)
+    {
+    	printf("Improper arguments for search");
+    	exit(0);
+	}
+	FILE *fp = open_db_file();
+	search(fp, argv[2]);
+	fclose(fp);
+  } 
+  	else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
     if (argc != 3) {
       print_usage("Improper arguments for delete", argv[0]);
       exit(1);
@@ -94,7 +104,15 @@ FILE *open_db_file() {
   
 void free_entries(entry *p) {
   /* TBD */
-  printf("Memory is not being freed. This needs to be fixed!\n");  
+  //printf("Memory is not being freed. This needs to be fixed!\n");  
+  entry *t = p;
+  entry *t_next;
+  while(t != NULL)
+  {
+  	t_next = t->next;
+  	free(t);
+  	t = t_next;
+  }
 }
 
 void print_usage(char *message, char *progname) {
@@ -177,12 +195,15 @@ void add(char *name, char *phone) {
 
 void list(FILE *db_file) {
   entry *p = load_entries(db_file);
+  int c = 0;
   entry *base = p;
   while (p!=NULL) {
+  	c++;
     printf("%-20s : %10s\n", p->name, p->phone);
     p=p->next;
   }
   /* TBD print total count */
+  printf("Total entries :  %d\n",c);
   free_entries(base);
 }
 
@@ -207,9 +228,44 @@ int delete(FILE *db_file, char *name) {
       */
 
       /* TBD */
+      if(p==base)
+      {
+      	base = p->next;
+      	free_entries(p);
+      	deleted = 1;
+	  }
+	  else
+	  {
+	  	prev->next = p->next;
+	  	free(p);
+	  	deleted = 1;
+	  	p = prev->next;
+	  	continue;
+	  }
     }
+    prev = p;
+    p = p->next;
   }
   write_all_entries(base);
   free_entries(base);
   return deleted;
+}
+
+void search(FILE *fp, char *name)
+{
+	entry *p = load_entries(fp);
+	entry *h = p;
+	while(p!=NULL)
+	{
+		if(strcmp(p->name, name)==0)
+		{
+			printf("%s\n",p->phone);
+			free_entries(h);
+			exit(0);
+		}
+		p = p->next;
+	}
+	printf("no match\n");
+	free_entries(h);
+	exit(0);
 }
